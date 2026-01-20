@@ -134,9 +134,87 @@ The `statements_processing` folder contains advanced examples showcasing differe
 
 This comparison helps you understand when to use each approach based on document type, volume, complexity, and cost considerations. Review the implementations to see practical examples of model selection and integration strategies.
 
+## Part 4 - Explore the Full Potential of Mistral Models
 
+Mistral AI offers powerful document understanding capabilities through **Data Annotations** - a feature that enables structured data extraction with precise location information (bounding boxes) for each extracted field.
 
+### What are Data Annotations?
 
+Data Annotations in Mistral Document AI allow you to:
+
+| Feature | Description |
+|---------|-------------|
+| **Structured Extraction** | Define JSON schemas to extract specific fields from documents |
+| **Bounding Boxes** | Get precise coordinates showing where each field was found on the page |
+| **Visual Verification** | Highlight extracted regions for human review and validation |
+| **Confidence Scores** | Receive confidence levels for each extracted field |
+| **Multi-page Support** | Process complex documents with page-level annotations |
+
+### Why Use Data Annotations for Insurance Claims?
+
+In insurance claim processing, knowing *where* information came from is just as important as *what* was extracted:
+
+1. **Audit Trail**: Bounding boxes provide visual proof of where data originated
+2. **Fraud Detection**: Verify that signatures, dates, and amounts match their expected locations
+3. **Human-in-the-Loop**: Enable reviewers to quickly verify AI extractions
+4. **Regulatory Compliance**: Maintain traceable data lineage for compliance requirements
+
+### Implementation Example
+
+Navigate to `statements_processing/mistral_doc_intel_annotations.py` for a comprehensive implementation that demonstrates:
+
+```python
+# Define a schema for structured extraction
+CLAIM_STATEMENT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "claimant_name": {"type": "string", "description": "Full name of claimant"},
+        "policy_number": {"type": "string", "description": "Insurance policy number"},
+        "incident_description": {"type": "string", "description": "What happened"},
+        "damage_description": {"type": "string", "description": "Damage details"},
+        "signature_present": {"type": "boolean", "description": "Is signature present"}
+    }
+}
+
+# Extract with bounding box annotations
+result = extract_with_annotations(
+    file_path="claim_form.pdf",
+    json_schema=CLAIM_STATEMENT_SCHEMA,
+    include_bboxes=True
+)
+
+# Each field includes its location on the document
+for annotation in result['annotations']:
+    print(f"Field: {annotation.field_name}")
+    print(f"Value: {annotation.value}")
+    print(f"Location: Page {annotation.bbox.page}, ({annotation.bbox.x_min}, {annotation.bbox.y_min})")
+```
+
+### Key Functions in the Implementation
+
+| Function | Purpose |
+|----------|---------|
+| `extract_with_annotations()` | Core extraction with JSON schema and bounding boxes |
+| `extract_claim_statement()` | Pre-configured for insurance claim forms |
+| `extract_damage_assessment()` | Specialized for vehicle damage analysis |
+| `batch_extract_with_annotations()` | Process multiple documents concurrently |
+| `visualize_annotations()` | Generate visual overlay of extracted fields |
+| `export_annotations_to_json()` | Save results with full annotation data |
+
+### Running the Demo
+
+```bash
+cd challenge-1/statements_processing
+python mistral_doc_intel_annotations.py ../../challenge-0/data/statements/crash1_front.jpeg
+```
+
+This will process the claim statement, extract structured data with annotations, and export the results to a JSON file showing the exact location of each extracted field.
+
+### Learn More
+
+- [Mistral Document AI Documentation](https://docs.mistral.ai/capabilities/document_ai)
+- [JSON Schema for Structured Extraction](https://docs.mistral.ai/capabilities/document_ai/#structured-extraction)
+- [Bounding Box Annotations Guide](https://docs.mistral.ai/capabilities/document_ai/#annotations)
 
 ## 🎯 Conclusion
 
